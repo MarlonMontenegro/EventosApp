@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 // Importar routers
 import eventsRoutes from "./src/routes/events.js";
+import attendeesRoutes from "./src/routes/attendees.js";
 
 dotenv.config();
 
@@ -14,7 +15,8 @@ app.use(express.json());
 app.use(cors());
 
 // Rutas
-app.use("/api/events", eventsRoutes); // todas las rutas de eventos
+app.use("/api/events", eventsRoutes);
+app.use("/api/attendees", attendeesRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {

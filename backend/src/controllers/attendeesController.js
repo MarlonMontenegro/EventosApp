@@ -1,3 +1,6 @@
+import admin from "firebase-admin";
+import { dbAdmin } from "../config/firebaseAdmin.js";
+
 export const attendEvent = async (req, res) => {
   try {
     const eventId = req.params.id;
@@ -37,6 +40,35 @@ export const getAttendees = async (req, res) => {
     const attendees = attendeesSnapshot.docs.map((doc) => doc.data());
 
     res.json({ success: true, attendees });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const cancelAttendance = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const { userId } = req.body;
+
+    if (!userId)
+      return res.status(400).json({ success: false, error: "Falta userId" });
+
+    const attendeeRef = dbAdmin
+      .collection("events")
+      .doc(eventId)
+      .collection("attendees")
+      .doc(userId);
+    const attendeeDoc = await attendeeRef.get();
+
+    if (!attendeeDoc.exists) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Asistencia no encontrada" });
+    }
+
+    await attendeeRef.delete();
+
+    res.json({ success: true, message: "Asistencia cancelada correctamente" });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

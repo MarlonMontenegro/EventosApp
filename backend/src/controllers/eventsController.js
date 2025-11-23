@@ -74,3 +74,49 @@ export const attendEvent = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+export const listPastEvents = async (req, res) => {
+  try {
+    const eventsSnapshot = await dbAdmin.collection("events").get();
+    const now = new Date();
+
+    const pastEvents = eventsSnapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.date.toDate(), // Convertir Firestore Timestamp a Date
+        };
+      })
+      .filter((event) => event.date < now)
+      .sort((a, b) => b.date - a.date); // Ordenar de más reciente a más antiguo
+
+    res.json({ success: true, events: pastEvents });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const listFutureEvents = async (req, res) => {
+  try {
+    const eventsSnapshot = await dbAdmin.collection("events").get();
+    const now = new Date();
+
+    const futureEvents = eventsSnapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.date.toDate(),
+        };
+      })
+      .filter((event) => event.date >= now)
+      .sort((a, b) => a.date - b.date); // Más próximos primero
+
+    res.json({ success: true, events: futureEvents });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

@@ -2,6 +2,7 @@ import express from "express";
 import {
   attendEvent,
   getAttendees,
+  cancelAttendance,
 } from "../controllers/attendeesController.js";
 
 const router = express.Router();

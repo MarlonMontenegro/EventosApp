@@ -3,6 +3,8 @@ import {
   createEvent,
   getEvents,
   attendEvent,
+  listPastEvents,
+  listFutureEvents,
 } from "../controllers/eventsController.js";
 
 const router = express.Router();

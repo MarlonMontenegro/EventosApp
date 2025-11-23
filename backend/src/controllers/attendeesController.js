@@ -73,3 +73,33 @@ export const cancelAttendance = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+export const listUserEvents = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing userId",
+      });
+    }
+
+    // Buscar todos los eventos donde aparece este usuario en attendees
+    const events = await db
+      .selectFrom("events")
+      .selectAll()
+      .where("attendees", "@>", JSON.stringify([{ userId }]))
+      .execute();
+
+    return res.json({
+      success: true,
+      data: events,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};

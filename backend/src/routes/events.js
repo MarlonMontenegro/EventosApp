@@ -1,18 +1,21 @@
 import express from "express";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 import {
   createEvent,
   getEvents,
-  attendEvent,
-  listPastEvents,
-  listFutureEvents,
+  getEventById,
+  deleteEvent,
 } from "../controllers/eventsController.js";
 
 const router = express.Router();
 
-router.post("/create", createEvent);
-router.get("/", getEvents);
-router.post("/:id/attend", attendEvent);
-router.get("/past", listPastEvents);
-router.get("/future", listFutureEvents);
+router.post("/create", authMiddleware, createEvent);
+router.get("/", authMiddleware, getEvents);
+
+// Obtener 1 evento por id
+router.get("/:id", authMiddleware, getEventById);
+
+// Eliminar evento
+router.delete("/:id", authMiddleware, deleteEvent);
 
 export default router;

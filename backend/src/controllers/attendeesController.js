@@ -4,10 +4,19 @@ import { dbAdmin } from "../config/firebaseAdmin.js";
 export const attendEvent = async (req, res) => {
   try {
     const eventId = req.params.id;
-    const { userId } = req.body; // UID del usuario que asistirá
+    const { userId } = req.body; // UID del usuario que asistirá (puede venir del body)
 
-    if (!userId)
-      return res.status(400).json({ success: false, error: "Falta userId" });
+    // También tomamos datos del token verificado por authMiddleware
+    const authUser = req.user || {}; // { uid, email, ... }
+    const uid = authUser.uid || userId;
+    const email = authUser.email || null;
+
+    if (!uid) {
+      return res.status(400).json({
+        success: false,
+        error: "Falta userId o no se pudo obtener del token",
+      });
+    }
 
     const eventRef = dbAdmin.collection("events").doc(eventId);
     const eventDoc = await eventRef.get();
@@ -19,9 +28,10 @@ export const attendEvent = async (req, res) => {
     }
 
     // Guardar asistencia en subcolección attendees
-    const attendeeRef = eventRef.collection("attendees").doc(userId);
+    const attendeeRef = eventRef.collection("attendees").doc(uid);
     await attendeeRef.set({
-      userId,
+      userId: uid,
+      email: email,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 

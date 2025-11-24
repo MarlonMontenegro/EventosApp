@@ -1,29 +1,46 @@
 import admin from "../config/firebaseAdmin.js";
 
 /**
- * authMiddleware
- * - Lee el header Authorization: Bearer <ID_TOKEN>
- * - Verifica el token con firebase-admin
- * - Si es válido pone req.user = decodedToken (contiene uid, email, etc.)
- * - Si no es válido devuelve 401
+ * authMiddleware mejorado
+ * - Verifica el token
+ * - Siempre adjunta uid + email reales
  */
 export const authMiddleware = async (req, res, next) => {
   try {
     const header = req.headers.authorization || "";
     if (!header.startsWith("Bearer ")) {
-      return res.status(401).json({ success: false, error: "Token requerido" });
+      return res.status(401).json({
+        success: false,
+        error: "Token requerido",
+      });
     }
 
     const token = header.split(" ")[1];
 
-    // verifica token con firebase-admin
+    // 1) Verificar token
     const decoded = await admin.auth().verifyIdToken(token);
 
-    // Attach user info to request
-    req.user = decoded; // decoded.uid, decoded.email, etc.
+    let uid = decoded.uid;
+    let email = decoded.email || null;
 
-    return next();
+    // 2) Si Firebase NO manda el email → traerlo desde la base de usuarios
+    if (!email) {
+      const userRecord = await admin.auth().getUser(uid);
+      email = userRecord.email || null;
+    }
+
+    // 3) Guardarlo en req.user
+    req.user = {
+      uid,
+      email,
+    };
+
+    next();
   } catch (err) {
-    return res.status(401).json({ success: false, error: "Token inválido" });
+    console.error("authMiddleware error:", err);
+    return res.status(401).json({
+      success: false,
+      error: "Token inválido",
+    });
   }
 };

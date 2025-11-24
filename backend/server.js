@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 // Importar routers
 import eventsRoutes from "./src/routes/events.js";
 import attendeesRoutes from "./src/routes/attendees.js";
-import { authMiddleware } from "./src/middlewares/authMiddleware.js";
 import usersRoutes from "./src/routes/users.js";
 
 dotenv.config();
@@ -16,9 +15,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Rutas
-app.use("/api/events", authMiddleware, eventsRoutes);
-app.use("/api/attendees", authMiddleware, attendeesRoutes);
+// Rutas (sin auth global)
+app.use("/api/events", eventsRoutes);
+app.use("/api/attendees", attendeesRoutes);
 app.use("/api/users", usersRoutes);
 
 // Ruta de prueba

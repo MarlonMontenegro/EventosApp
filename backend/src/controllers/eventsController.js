@@ -120,3 +120,38 @@ export const listFutureEvents = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+export const getEventById = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const doc = await dbAdmin.collection("events").doc(eventId).get();
+
+    if (!doc.exists) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Evento no encontrado" });
+    }
+
+    return res.json({
+      success: true,
+      event: { id: doc.id, ...doc.data() },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const deleteEvent = async (req, res) => {
+  try {
+    const eventId = req.params.id;
+
+    await dbAdmin.collection("events").doc(eventId).delete();
+
+    return res.json({
+      success: true,
+      message: "Evento eliminado correctamente",
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+};

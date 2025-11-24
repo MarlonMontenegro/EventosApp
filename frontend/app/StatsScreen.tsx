@@ -1,4 +1,3 @@
-// mobile/src/screens/StatsScreen.js
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -7,28 +6,35 @@ import {
   StyleSheet,
   ScrollView,
 } from "react-native";
+import { fetchStatsOverview } from "../src/api/apiStats";
 
-import { fetchStatsOverview } from "../services/api";
+interface StatsOverview {
+  totalEvents: number;
+  totalComments: number;
+  totalAttendees: number;
+  uniqueUsers?: number;
+  averageRatingGlobal?: number;
+}
 
 export default function StatsScreen() {
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState<StatsOverview | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadStats = async () => {
+    try {
+      const data = await fetchStatsOverview();
+      setStats(data);
+    } catch (err) {
+      console.error(err);
+      setError("No se pudieron cargar las estadísticas");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await fetchStatsOverview();
-        setStats(data);
-      } catch (err) {
-        console.error(err);
-        setError("No se pudieron cargar las estadísticas");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+    loadStats();
   }, []);
 
   if (loading) {
@@ -80,8 +86,6 @@ export default function StatsScreen() {
           </Text>
         </View>
       )}
-
-      {/* Puedes seguir mostrando topCreators, eventsByMonthLastYear, etc. */}
     </ScrollView>
   );
 }

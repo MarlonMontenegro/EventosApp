@@ -22,7 +22,7 @@ interface EventItem {
   location?: string;
   type?: string;
   subtype?: string;
-  createdBy?: string; // aquí va el email que mandas en createdBy
+  createdBy?: string;
 }
 
 export default function HomeScreen() {
@@ -72,7 +72,6 @@ export default function HomeScreen() {
   const toDate = (value: any): Date => {
     if (!value) return new Date(NaN);
 
-    // Firestore Timestamp serializado (_seconds o seconds)
     if (typeof value === "object" && (value._seconds || value.seconds)) {
       const seconds = value._seconds ?? value.seconds;
       return new Date(seconds * 1000);
@@ -99,7 +98,6 @@ export default function HomeScreen() {
     return d >= now ? "Abierto" : "Cerrado";
   };
 
-  // 🔹 Separar eventos futuros y "tus" eventos
   const { futureEvents, myFutureEvents } = useMemo(() => {
     const now = new Date();
 
@@ -171,7 +169,6 @@ export default function HomeScreen() {
             </Text>
           </View>
 
-          {/* 👇 Aquí activamos la navegación al detalle */}
           <TouchableOpacity
             onPress={() => router.push(`/event-details?id=${event.id}`)}
           >
@@ -190,7 +187,6 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {/* Header + logout */}
         <View style={styles.headerRow}>
           <View style={{ flex: 1, paddingRight: 16 }}>
             <Text style={styles.appTitle}>Eventos comunitarios</Text>
@@ -204,7 +200,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Botón Crear evento */}
         <TouchableOpacity
           style={styles.primaryButton}
           onPress={() => router.push("/create-event")}
@@ -214,7 +209,6 @@ export default function HomeScreen() {
 
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-        {/* 🔹 Sección: Tus próximos eventos */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Tus próximos eventos</Text>
           <Text style={styles.sectionCount}>{myFutureEvents.length}</Text>
@@ -230,7 +224,6 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* 🔹 Sección: Próximos eventos (todos) */}
         <View style={[styles.sectionHeader, { marginTop: 24 }]}>
           <Text style={styles.sectionTitle}>Próximos eventos</Text>
           <Text style={styles.sectionCount}>{futureEvents.length}</Text>
@@ -245,6 +238,18 @@ export default function HomeScreen() {
             futureEvents.map(renderEventCard)
           )}
         </View>
+
+        {/* 🔥 NUEVA SECCIÓN DE STATS */}
+        <View style={[styles.sectionHeader, { marginTop: 32 }]}>
+          <Text style={styles.sectionTitle}>Estadísticas</Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.statsButton}
+          onPress={() => router.push("/stats")}
+        >
+          <Text style={styles.statsButtonText}>Ver estadísticas</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -400,5 +405,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     color: "#2563EB",
+  },
+
+  statsButton: {
+    marginTop: 12,
+    backgroundColor: "#1D4ED8",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  statsButtonText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "600",
   },
 });

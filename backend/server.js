@@ -6,6 +6,8 @@ import dotenv from "dotenv";
 import eventsRoutes from "./src/routes/events.js";
 import attendeesRoutes from "./src/routes/attendees.js";
 import usersRoutes from "./src/routes/users.js";
+import commentsRoutes from "./src/routes/comments.js";
+import statsRoutes from "./src/routes/stats.js";
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.use(cors());
 app.use("/api/events", eventsRoutes);
 app.use("/api/attendees", attendeesRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/comments", commentsRoutes);
+app.use("/api/stats", statsRoutes);
 
 // Ruta de prueba
 app.get("/", (req, res) => {

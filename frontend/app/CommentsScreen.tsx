@@ -1,31 +1,42 @@
-// mobile/src/screens/CommentsScreen.js
 import React, { useEffect, useState } from "react";
-import {  View,  Text,  FlatList,  ActivityIndicator,  StyleSheet,} from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
+import { fetchComments } from "../src/api/apiStats"; // AJUSTA ESTA RUTA
 
-import { fetchComments } from "../services/api";
+// ⚠️ Cambiá este ID por el que venga por navegación cuando unamos las pantallas
+const TEST_EVENT_ID = "8sSzIfJm2Mo3TyDBKlux";
 
-const EVENT_ID_DE_PRUEBA = "8sSzIfJm2Mo3TyDBKlux"; 
-// 👆 usa el ID que probaste en Thunder Client
+interface CommentItem {
+  id: string;
+  userId?: string;
+  text: string;
+  rating?: number;
+}
 
 export default function CommentsScreen() {
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<CommentItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadComments = async () => {
+    try {
+      const data = await fetchComments(TEST_EVENT_ID);
+      setComments(data || []);
+    } catch (e) {
+      console.error(e);
+      setError("No se pudieron cargar los comentarios");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await fetchComments(EVENT_ID_DE_PRUEBA);
-        setComments(data);
-      } catch (err) {
-        console.error(err);
-        setError("No se pudieron cargar los comentarios");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    load();
+    loadComments();
   }, []);
 
   if (loading) {
@@ -45,7 +56,7 @@ export default function CommentsScreen() {
     );
   }
 
-  if (!comments.length) {
+  if (comments.length === 0) {
     return (
       <View style={styles.center}>
         <Text>No hay comentarios para este evento.</Text>
@@ -56,14 +67,16 @@ export default function CommentsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Comentarios del evento</Text>
+
       <FlatList
         data={comments}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.commentCard}>
-            <Text style={styles.user}>{item.userId || "Usuario"}</Text>
+            <Text style={styles.user}>{item.userId ?? "Usuario"}</Text>
             <Text style={styles.text}>{item.text}</Text>
-            {item.rating != null && (
+
+            {item.rating !== undefined && (
               <Text style={styles.rating}>⭐ {item.rating}</Text>
             )}
           </View>

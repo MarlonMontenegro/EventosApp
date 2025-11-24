@@ -18,8 +18,11 @@ import { AuthContext } from "../src/context/authContext";
 import { auth } from "../src/firebase/firebaseConfig";
 import { FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 
-// Expo Facebook
-import * as Facebook from "expo-facebook";
+// Expo Auth Session (Facebook)
+import * as Facebook from "expo-auth-session/providers/facebook";
+import * as WebBrowser from "expo-web-browser";
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const authCtx: any = useContext(AuthContext as any) || {};
@@ -28,13 +31,17 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // Hook de Facebook (Auth Session)
+  const [request, response, promptAsync] = Facebook.useAuthRequest({
+    clientId: "1633996514233401", // tu App ID de Facebook
+    scopes: ["public_profile", "email"],
+  });
+
   async function handleLogin() {
     try {
       await login(email.trim(), password);
       router.replace("/(tabs)");
-    } catch {
-      // El contexto ya maneja el error
-    }
+    } catch {}
   }
 
   function goToRegister() {
@@ -43,32 +50,27 @@ export default function LoginScreen() {
 
   const isDisabled = !email || !password || isLoading;
 
-  // 🔵 Login real con Facebook + Firebase
   const handleFacebookLogin = async () => {
     try {
-      // 1) Inicializar SDK de Facebook
-      await Facebook.initializeAsync({
-        appId: "TU_FACEBOOK_APP_ID", // 👈 pon aquí tu App ID de Facebook
-        appName: "Eventos Comunitarios", // opcional, solo para identificar la app
-      });
+      // Abre el flujo de login de Facebook
+      const result = await promptAsync();
 
-      // 2) Abrir pantalla de login de Facebook
-      const result = await Facebook.logInWithReadPermissionsAsync({
-        permissions: ["public_profile", "email"],
-      });
+      if (result?.type === "success" && result.authentication?.accessToken) {
+        const token = result.authentication.accessToken;
 
-      if (result.type === "success" && result.token) {
-        // 3) Crear credencial de Facebook para Firebase
-        const credential = FacebookAuthProvider.credential(result.token);
+        // Crear credencial de Facebook para Firebase
+        const credential = FacebookAuthProvider.credential(token);
 
-        // 4) Iniciar sesión en Firebase con esa credencial
+        // Iniciar sesión en Firebase con esa credencial
         await signInWithCredential(auth, credential);
 
-        // 5) Tu AuthContext (onAuthStateChanged) detecta la sesión y guarda el token
-        // Aquí solo navegamos al home
+        // onAuthStateChanged en tu AuthContext se encargará del resto
         router.replace("/(tabs)");
       } else {
-        console.log("Login de Facebook cancelado o fallido:", result.type);
+        console.log(
+          "Login de Facebook cancelado o fallido:",
+          result?.type ?? "sin tipo"
+        );
       }
     } catch (e) {
       console.log("Error en login con Facebook:", e);
@@ -88,8 +90,12 @@ export default function LoginScreen() {
           </Text>
         </View>
 
-        {/* Botón de Facebook REAL */}
-        <TouchableOpacity style={styles.fbButton} onPress={handleFacebookLogin}>
+        {/* Botón de Facebook */}
+        <TouchableOpacity
+          style={styles.fbButton}
+          onPress={handleFacebookLogin}
+          disabled={!request} // por si aún no está listo el request
+        >
           <Ionicons name="logo-facebook" size={20} color="#fff" />
           <Text style={styles.fbText}>Continuar con Facebook</Text>
         </TouchableOpacity>

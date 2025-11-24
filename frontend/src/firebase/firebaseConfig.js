@@ -1,0 +1,20 @@
+import { initializeApp } from "firebase/app";
+import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDrNW_tFsL0uYTvx1qyiLp1LOcdzJFgKs0",
+  authDomain: "eventos-comunitarios-c94d9.firebaseapp.com",
+  projectId: "eventos-comunitarios-c94d9",
+  storageBucket: "eventos-comunitarios-c94d9.firebasestorage.app",
+  messagingSenderId: "238782845718",
+  appId: "1:238782845718:web:128b3a95b7bb1149cbb637",
+};
+
+// Inicializar Firebase
+const app = initializeApp(firebaseConfig);
+
+// Inicializar Auth con persistencia (Expo)
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});

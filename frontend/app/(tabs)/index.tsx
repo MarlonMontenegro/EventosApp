@@ -246,7 +246,7 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={styles.statsButton}
-          onPress={() => router.push("/stats")}
+          onPress={() => router.push("/StatsScreen")}
         >
           <Text style={styles.statsButtonText}>Ver estadísticas</Text>
         </TouchableOpacity>

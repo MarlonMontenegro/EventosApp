@@ -97,7 +97,7 @@ Campos:
 
 ### ✔️ Ver detalles del evento
 
-Incluye:
+*Incluye:
 
 - Título
 - Fecha y lugar
@@ -105,7 +105,7 @@ Incluye:
 - Creador
 - Lista de asistentes
 
-Acciones:
+*Acciones:
 
 - Asistir
 - Cancelar asistencia
